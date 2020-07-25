@@ -1,0 +1,19 @@
+#App {
+	width: 1200px;
+	min-height: 100vh;
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+#App-header {
+  display: flex;
+  justify-content: center;
+	font-size: 2rem;
+}
+
+#main {
+	margin-top: 2rem;
+	text-align: center;
+}

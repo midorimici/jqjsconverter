@@ -1,0 +1,24 @@
+import React, { useRef, useState } from 'react';
+
+import Editor from '@monaco-editor/react';
+
+import './InputBox.scss'
+
+export default ({ valueGetter }: { valueGetter: () => string }) => {
+	const [isEditorReady, setIsEditorReady] = useState<boolean>(false);
+
+	const handleEditorDidMount = (_valueGetter: () => string): void => {
+		setIsEditorReady(true);
+		valueGetter = _valueGetter;
+	};
+
+	return (
+		<div className='editor'>
+			<Editor
+				height='30vh'
+				language='javascript'
+				editorDidMount={handleEditorDidMount}
+			/>
+		</div>
+	);
+}
