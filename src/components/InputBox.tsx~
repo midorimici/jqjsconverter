@@ -1,23 +1,22 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 
 import Editor from '@monaco-editor/react';
 
-import './InputBox.scss'
+import './Wrapper.scss'
 
-export default ({ valueGetter }: { valueGetter: () => string }) => {
-	const [isEditorReady, setIsEditorReady] = useState<boolean>(false);
+type Props = {
+	handleEditorDidMount: (getEditorValue: () => string) => void;
+	value: string;
+}
 
-	const handleEditorDidMount = (_valueGetter: () => string): void => {
-		setIsEditorReady(true);
-		valueGetter = _valueGetter;
-	};
-
+export default ({ handleEditorDidMount }: Props ) => {
 	return (
 		<div className='editor'>
 			<Editor
 				height='30vh'
 				language='javascript'
 				editorDidMount={handleEditorDidMount}
+				value={value}
 			/>
 		</div>
 	);

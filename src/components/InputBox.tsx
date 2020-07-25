@@ -2,15 +2,21 @@ import React from 'react';
 
 import Editor from '@monaco-editor/react';
 
-import './InputBox.scss'
+import './Wrapper.scss'
 
-export default ({ handleEditorDidMount }: { handleEditorDidMount: (getEditorValue: () => string) => void }) => {
+type Props = {
+	handleEditorDidMount: (getEditorValue: () => string) => void;
+	value: string;
+}
+
+export default ({ handleEditorDidMount, value }: Props ) => {
 	return (
 		<div className='editor'>
 			<Editor
 				height='30vh'
 				language='javascript'
 				editorDidMount={handleEditorDidMount}
+				value={value}
 			/>
 		</div>
 	);
