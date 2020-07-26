@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 import InputBox from './InputBox';
+import jq2js from '../utils/jqjsconv';
 
 export default () => {
 	const [isEditorReady, setIsEditorReady] = useState<boolean>(false);
@@ -20,11 +21,11 @@ export default () => {
 		jsGetter.current = valueGetter
 	};
 
-	const getJQValue = (): void => {
-		setJSValue(jqGetter.current());
+	const convert2JQ = (): void => {
+		setJSValue(jq2js(jqGetter.current()));
 	};
 
-	const getJSValue = (): void => {
+	const convert2JS = (): void => {
 		setJQValue(jsGetter.current());
 	};
 
@@ -38,12 +39,12 @@ export default () => {
 			<div id='buttons'>
 				<button
 					id='jqjs-button'
-					onClick={getJQValue}
+					onClick={convert2JQ}
 					disabled={!isEditorReady}
 				>▼</button>
 				<button
 					id='jsjq-button'
-					onClick={getJSValue}
+					onClick={convert2JS}
 					disabled={!isEditorReady}
 				>▲</button>
 			</div>
