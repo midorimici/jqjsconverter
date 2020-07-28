@@ -1,82 +1,140 @@
+const makeQuerySelector = (s: string): string => {
+	//// query selection ////
+	// tag
+	// div, p, button, etc...
+	let match: string[] = [...s.matchAll(/(?: )*(["'`])(\w*)["'`](?: )*/g)][0];
+	if (match) return `getElementsByTagName(${match[1] + match[2] + match[1]})`;
+	// id
+	// #id
+	match = [...s.matchAll(/(?: )*(["'`])#(\w*)["'`](?: )*/g)][0];
+	if (match) return `getElementById(${match[1] + match[2] + match[1]})`;
+	// class
+	// .foo
+	match = [...s.matchAll(/(?: )*(["'`])\.(\w*)["'`](?: )*/g)][0];
+	if (match) return `getElementsByClassName(${match[1] + match[2] + match[1]})`;
+
+	//// jQuery extensions ////
+	let quotSign: string = [...s.matchAll(/(?: )*(["'`]).*["'`](?: )*/g)][0][1] === `"` ? `'` : `"`;
+
+	// [property!=value]
+	match = [...s.matchAll(/(?: )*(["'`])(.*)\[(\w+)!=(\w+)\](.*)["'`](?: )*/g)][0];
+	if (match) return `querySelectorAll(${match[1] + match[2]}:not([${match[3]}=${match[4]}])${match[5] + match[1]})`;
+
+	// :file, :image, :password, :radio, :reset
+	match = [...s.matchAll(/(?: )*(["'`])(.*)(?::(file|image|password|radio|reset))(.*)["'`](?: )*/g)][0];
+	if (match) return `querySelectorAll(${match[1] + match[2]}[type=${quotSign + match[3] + quotSign}]${match[4] + match[1]})`;
+
+	// :parent
+	match = [...s.matchAll(/(?: )*(["'`])(.*):parent(.*)["'`](?: )*/g)][0];
+	if (match) return `querySelectorAll(${match[1] + match[2]}:not(:empty)${match[3] + match[1]})`;
+
+	// :selected
+	match = [...s.matchAll(/(?: )*(["'`])(.*):selected(.*)["'`](?: )*/g)][0];
+	if (match) return `querySelectorAll(${match[1] + match[2]}:checked${match[3] + match[1]})`;
+
+	// :button
+	let regex: RegExp = /(?: )*(["'`])(.*):button(.*)["'`](?: )*/g;
+	match = [...s.matchAll(regex)][0];
+	if (match) {
+		let sticked: string[] = [...match[2].matchAll(/(?:(.*(?: |>))((?:#|\.)\w+)?|(?:#|\.)\w+)/g)][0];
+		if (sticked) {
+			if (sticked[2]) {
+				return `querySelectorAll(${match[1] + sticked[1]}button${sticked[2] + match[3]}, ${sticked[1]}input[type=${quotSign}button${quotSign}]${sticked[2] + match[3] + match[1]})`
+			} else {
+				if (sticked[1]) {
+					return `querySelectorAll(${match[1] + sticked[1]}button${match[3]}, ${sticked[1]}input[type=${quotSign}button${quotSign}]${match[3] + match[1]})`
+				} else {
+					return `querySelectorAll(${match[1]}button${sticked[0] + match[3]}, input[type=${quotSign}button${quotSign}]${sticked[0] + match[3] + match[1]})`
+				}
+			}
+		} else {
+			return `querySelectorAll(${match[1]}button${match[3]}, input[type=${quotSign}button${quotSign}]${match[3] + match[1]})`;
+		}
+	}
+
+	// :submit
+	regex = /(?: )*(["'`])(.*?)( |>)?:submit(.*)["'`](?: )*/g;
+	match = [...s.matchAll(regex)][0];
+	let spaceOrArrow: boolean = ( match || '')[3] !== undefined;
+	if (match)
+		return spaceOrArrow
+			? `querySelectorAll(${match[1] + match[2] + match[3]}input[type=${quotSign}submit${quotSign}]${match[4]}, ${match[2] + match[3]}button[type=${quotSign}submit${quotSign}]${match[4] + match[1]})`
+			: `querySelectorAll(${match[1]}input[type=${quotSign}submit${quotSign}]${match[2] + match[4]}, button[type=${quotSign}submit${quotSign}]${match[2] + match[4] + match[1]})`;
+
+	// :text
+	regex = /(?: )*(["'`])(.*?)( |>)?:text(.*)["'`](?: )*/g;
+	match = [...s.matchAll(regex)][0];
+	spaceOrArrow = ( match || '')[3] !== undefined;
+	if (match)
+		return spaceOrArrow
+			? `querySelectorAll(${match[1] + match[2] + match[3]}input[type=${quotSign}text${quotSign}]${match[4]}, ${match[2] + match[3]}input:not([type])${match[4] + match[1]})`
+			: `querySelectorAll(${match[1]}input[type=${quotSign}text${quotSign}]${match[2] + match[4]}, input:not([type])${match[2] + match[4] + match[1]})`;
+
+	// :input
+	regex = /(?: )*(["'`])(.*?)( |>)?:input(.*)["'`](?: )*/g;
+	match = [...s.matchAll(regex)][0];
+	spaceOrArrow = ( match || '')[3] !== undefined;
+	if (match)
+		return spaceOrArrow
+			? `querySelectorAll(${match[1] + match[2] + match[3]}input${match[4]}, ${match[2] + match[3]}select${match[4]}, ${match[2] + match[3]}textarea${match[4]}, ${match[2] + match[3]}button${match[4] + match[1]})`
+			: `querySelectorAll(${match[1]}input${match[2] + match[4]}, select${match[2] + match[4]}, textarea${match[2] + match[4]}, button${match[2] + match[4] + match[1]})`;
+
+	// :header
+	regex = /(?: )*(["'`])(.*?)( |>)?:header(.*)["'`](?: )*/g;
+	match = [...s.matchAll(regex)][0];
+	spaceOrArrow = ( match || '')[3] !== undefined;
+	if (match)
+		return spaceOrArrow
+			? `querySelectorAll(${match[1] + match[2] + match[3]}h1${match[4]}, ${match[2] + match[3]}h2${match[4]}, ${match[2] + match[3]}h3${match[4]}, ${match[2] + match[3]}h4${match[4]}, ${match[2] + match[3]}h5${match[4]}, ${match[2] + match[3]}h6${match[4] + match[1]})`
+			: `querySelectorAll(${match[1]}h1${match[2] + match[4]}, h2${match[2] + match[4]}, h3${match[2] + match[4]}, h4${match[2] + match[4]}, h5${match[2] + match[4]}, h6${match[2] + match[4] + match[1]})`;
+
+
+	
+
+	// :hidden
+	
+	
+
+
+	// :first
+	regex = /(?: )*(["'`])(.*?)( |>)?:first( |>)?(.*)["'`](?: )*/g;
+	match = [...s.matchAll(regex)][0];
+	let spaceOrArrowL: boolean = ( match || '')[3] !== undefined;
+	let spaceOrArrowR: boolean = ( match || '')[4] !== undefined;
+
+	/*
+	if (match) {
+		if (spaceOrArrowL && spaceOrArrowR) {
+			return `querySelector(${match[1] + match[2] + match[1]}).${makeQuerySelector(match[1] + match[5] + match[1])}`;
+		} else if (spaceOrArrowL && !spaceOrArrowR) {
+			let sticked: string[] = [...match[5].matchAll(/((?:#|\.)(?:\w|#|\.)+)(?: |>)?(.*)/g)][0];
+			return sticked
+				? sticked[2]
+				? `querySelector(${match[1] + match[2] + sticked[1] + match[1]}).${makeQuerySelector(match[1] + sticked[2] + match[1])}`
+				: `querySelector(${match[1] + match[2] + sticked[1] + match[1]})`
+				: `querySelector(${match[1] + match[2] + match[1]})`
+		} else if (!spaceOrArrowL && spaceOrArrowR) {
+			return `querySelector(${match[1] + match[2] + match[1]}).${makeQuerySelector(match[1] + match[5] + match[1])}`
+		} else if (!spaceOrArrowL && !spaceOrArrowR) {
+			let sticked: string[] = [...match[5].matchAll(/((?:#|\.)(?:\w|#|\.)+)(?: |>)?(.*)/g)][0];
+			return sticked
+				? sticked[2]
+				? `querySelector(${match[1] + match[2] + sticked[1] + match[1]}).${makeQuerySelector(match[1] + sticked[2] + match[1])}`
+				: `querySelector(${match[1] + match[2] + sticked[1] + match[1]})`
+				: `querySelector(${match[1] + match[2] + match[1]})`
+		}
+	}
+	*/
+
+	//// selector ////
+	match = [...s.matchAll(/(?: )*(["'`])(.*)["'`](?: )*/g)][0];
+	if (match) return `querySelectorAll(${match[1] + match[2] + match[1]})`;
+
+	return '';
+};
+
 export default (text: string) => {
 	let t: string = text;
 
-	//// query selection ////
-	// tag
-	// div
-	t = t.replace(/(?:\$|jQuery)\((?: )*(["'`])(\w*)["'`](?: )*\)/g,
-		`document.getElementsByTagName($1$2$1)`)
-	// id
-	// #id
-	t = t.replace(/(?:\$|jQuery)\((?: )*(["'`])#(\w*)["'`](?: )*\)/g,
-		`document.getElementById($1$2$1)`)
-	// class
-	// .foo
-	t = t.replace(/(?:\$|jQuery)\((?: )*(["'`])\.(\w*)["'`](?: )*\)/g,
-		`document.getElementsByClassName($1$2$1)`)
-
-	//// jQuery extensions ////
-	let quotSign: string = [...t.matchAll(/(?:\$|jQuery)\((?: )*(["'`]).*["'`](?: )*\)/g)][0][1] === `"` ? `'` : `"`;
-
-	// [property!=value]
-	t = t.replace(/(?:\$|jQuery)\((?: )*(["'`])(.*)\[(\w+)!=(\w+)\](.*)["'`](?: )*\)/g,
-		`document.querySelectorAll($1$2:not([$3=$4])$5$1)`)
-
-	// :file, :image, :password, :radio, :reset
-	t = t.replace(/(?:\$|jQuery)\((?: )*(["'`])(.*)(?::(file|image|password|radio|reset))(.*)["'`](?: )*\)/g,
-		`document.querySelectorAll($1$2[type=${quotSign}$3${quotSign}]$4$1)`)
-
-	// :parent
-	t = t.replace(/(?:\$|jQuery)\((?: )*(["'`])(.*):parent(.*)["'`](?: )*\)/g,
-		`document.querySelectorAll($1$2:not(:empty)$3$1)`)
-
-	// :selected
-	t = t.replace(/(?:\$|jQuery)\((?: )*(["'`])(.*):selected(.*)["'`](?: )*\)/g,
-		`document.querySelectorAll($1$2:checked$3$1)`)
-
-	// :button
-	let regex: RegExp = /(?:\$|jQuery)\((?: )*(["'`])(.*?)( |>)?:button(.*)["'`](?: )*\)/g;
-	let spaceOrArrow: boolean = ([...t.matchAll(regex)][0] || '')[3] !== undefined;
-	t = t.replace(regex,
-		spaceOrArrow
-			? `document.querySelectorAll($1$2$3button$4, $2$3input[type=${quotSign}button${quotSign}]$4$1)`
-			: `document.querySelectorAll($1button$2$4, input[type=${quotSign}button${quotSign}]$2$4$1)`)
-
-	// :submit
-	regex = /(?:\$|jQuery)\((?: )*(["'`])(.*?)( |>)?:submit(.*)["'`](?: )*\)/g;
-	spaceOrArrow = ([...t.matchAll(regex)][0] || '')[3] !== undefined;
-	t = t.replace(regex,
-		spaceOrArrow
-			? `document.querySelectorAll($1$2$3input[type=${quotSign}submit${quotSign}]$4, $2$3button[type=${quotSign}submit${quotSign}]$4$1)`
-			: `document.querySelectorAll($1input[type=${quotSign}submit${quotSign}]$2$4, button[type=${quotSign}submit${quotSign}]$2$4$1)`)
-
-	// :text
-	regex = /(?:\$|jQuery)\((?: )*(["'`])(.*?)( |>)?:text(.*)["'`](?: )*\)/g;
-	spaceOrArrow = ([...t.matchAll(regex)][0] || '')[3] !== undefined;
-	t = t.replace(regex,
-		spaceOrArrow
-			? `document.querySelectorAll($1$2$3input[type=${quotSign}text${quotSign}]$4, $2$3input:not([type])$4$1)`
-			: `document.querySelectorAll($1input[type=${quotSign}text${quotSign}]$2$4, input:not([type])$2$4$1)`)
-
-	// :input
-	regex = /(?:\$|jQuery)\((?: )*(["'`])(.*?)( |>)?:input(.*)["'`](?: )*\)/g;
-	spaceOrArrow = ([...t.matchAll(regex)][0] || '')[3] !== undefined;
-	t = t.replace(regex,
-		spaceOrArrow
-			? `document.querySelectorAll($1$2$3input$4, $2$3select$4, $2$3textarea$4, $2$3button$4$1)`
-			: `document.querySelectorAll($1input$2$4, select$2$4, textarea$2$4, button$2$4$1)`)
-
-	// :header
-	regex = /(?:\$|jQuery)\((?: )*(["'`])(.*?)( |>)?:header(.*)["'`](?: )*\)/g;
-	spaceOrArrow = ([...t.matchAll(regex)][0] || '')[3] !== undefined;
-	t = t.replace(regex,
-		spaceOrArrow
-			? `document.querySelectorAll($1$2$3h1$4, $2$3h2$4, $2$3h3$4, $2$3h4$4, $2$3h5$4, $2$3h6$4$1)`
-			: `document.querySelectorAll($1h1$2$4, h2$2$4, h3$2$4, h4$2$4, h5$2$4, h6$2$4$1)`)
-
-	//// selector ////
-	t = t.replace(/(?:\$|jQuery)\((?: )*(["'`])(.*)["'`](?: )*\)/g,
-		`document.querySelectorAll($1$2$1)`);
-
-	return t;
+	return `document.${makeQuerySelector(t.replace(/(?:\$|jQuery)\((.*)\)/g, '$1'))}`;
 };
