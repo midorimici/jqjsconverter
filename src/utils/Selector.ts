@@ -6,12 +6,15 @@ export default (s: string): string => {
 	if (match) return `getElementsByTagName(${match[1] + match[2] + match[1]})`;
 	// id
 	// #id
-	match = [...s.matchAll(/(?: )*(["'`])#(\w*)["'`](?: )*/g)][0];
+	match = [...s.matchAll(/(?: )*(["'`])[.\w]*#(\w*)[.\w]*["'`](?: )*/g)][0];
 	if (match) return `getElementById(${match[1] + match[2] + match[1]})`;
 	// class
 	// .foo
 	match = [...s.matchAll(/(?: )*(["'`])\.(\w*)["'`](?: )*/g)][0];
 	if (match) return `getElementsByClassName(${match[1] + match[2] + match[1]})`;
+	// name
+	match = [...s.matchAll(/(?: )*(["'`]) *\[ *name *= *(\w*) *\] *["'`](?: )*/g)][0];
+	if (match) return `getElementsByName(${match[1] + match[2] + match[1]})`;
 
 	//// jQuery extensions ////
 	let quotSign: string = [...s.matchAll(/(?: )*(["'`]).*["'`](?: )*/g)][0][1] === `"` ? `'` : `"`;
@@ -139,36 +142,10 @@ export default (s: string): string => {
 	
 	
 
+	//// create element ////
+	match = [...s.matchAll(/(?: )*(["'`])<(\w+) ?\/?>(?:<\/\w+>)?["'`](?: )*/g)][0];
+	if (match) return `createElement(${match[1] + match[2] + match[1]})`;
 
-	// :first
-	regex = /(?: )*(["'`])(.*?)( |>)?:first( |>)?(.*)["'`](?: )*/g;
-	match = [...s.matchAll(regex)][0];
-	let spaceOrArrowL: boolean = ( match || '')[3] !== undefined;
-	let spaceOrArrowR: boolean = ( match || '')[4] !== undefined;
-
-	/*
-	if (match) {
-		if (spaceOrArrowL && spaceOrArrowR) {
-			return `querySelector(${match[1] + match[2] + match[1]}).${makeQuerySelector(match[1] + match[5] + match[1])}`;
-		} else if (spaceOrArrowL && !spaceOrArrowR) {
-			let sticked: string[] = [...match[5].matchAll(/((?:#|\.)(?:\w|#|\.)+)(?: |>)?(.*)/g)][0];
-			return sticked
-				? sticked[2]
-				? `querySelector(${match[1] + match[2] + sticked[1] + match[1]}).${makeQuerySelector(match[1] + sticked[2] + match[1])}`
-				: `querySelector(${match[1] + match[2] + sticked[1] + match[1]})`
-				: `querySelector(${match[1] + match[2] + match[1]})`
-		} else if (!spaceOrArrowL && spaceOrArrowR) {
-			return `querySelector(${match[1] + match[2] + match[1]}).${makeQuerySelector(match[1] + match[5] + match[1])}`
-		} else if (!spaceOrArrowL && !spaceOrArrowR) {
-			let sticked: string[] = [...match[5].matchAll(/((?:#|\.)(?:\w|#|\.)+)(?: |>)?(.*)/g)][0];
-			return sticked
-				? sticked[2]
-				? `querySelector(${match[1] + match[2] + sticked[1] + match[1]}).${makeQuerySelector(match[1] + sticked[2] + match[1])}`
-				: `querySelector(${match[1] + match[2] + sticked[1] + match[1]})`
-				: `querySelector(${match[1] + match[2] + match[1]})`
-		}
-	}
-	*/
 
 	//// selector ////
 	match = [...s.matchAll(/(?: )*(["'`])(.*)["'`](?: )*/g)][0];

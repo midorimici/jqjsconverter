@@ -46,10 +46,12 @@ export default (name: string, args: string): string => {
 			let regex: RegExp = /(?:\$|jQuery)\((.*["'`] *)\)/g;
 			let match: string[] = [...args.matchAll(regex)][0];
 			if (match) {
-				return `%_%.map(e => ${makeQuerySelector(match[1])})`;
+				if (~args.indexOf('#')) return `document.${makeQuerySelector(match[1])}`;
+				return `Array.from(%_%).map(e => ${makeQuerySelector(match[1])})`;
 			}
 
-			return `%_%.map(e => ${makeQuerySelector(args)})`;
+			if (~args.indexOf('#')) return `document.${makeQuerySelector(args)}`;
+			return `Array.from(%_%).map(e => ${makeQuerySelector(args)})`;
 		}
 
 		// .has()
@@ -59,37 +61,39 @@ export default (name: string, args: string): string => {
 
 		//// tree traversal ////
 		// .find()
-		case 'find': return `%_%.map(e => e.${makeQuerySelector(args)})`;
+		case 'find':
+			if (~args.indexOf('#')) return `document.${makeQuerySelector(args)}`;
+			return `Array.from(%_%).map(e => e.${makeQuerySelector(args)})`;
 
 		// .children()
-		case 'children': return `%_%.map(e => querySelector(":scope > ${args || '*'}"))`;
+		case 'children': return `Array.from(%_%).map(e => querySelector(":scope > ${args || '*'}"))`;
 
 		// .parent()
-		case 'parent': return `%_%.map(e => parentNode)`;
+		case 'parent': return `Array.from(%_%).map(e => parentNode)`;
 
 		// .closest()
-		case 'closest': return `%_%.map(e => closest(${args}))`;
+		case 'closest': return `Array.from(%_%).map(e => closest(${args}))`;
 
 		// .next()
-		case 'next': return `%_%.map(e => nextElementSibling)`;
+		case 'next': return `Array.from(%_%).map(e => nextElementSibling)`;
 
 		// .prev()
-		case 'prev': return `%_%.map(e => previousElementSibling)`;
+		case 'prev': return `Array.from(%_%).map(e => previousElementSibling)`;
 
 		// .siblings()
-		case 'siblings': return `%_%.map(e => parentNode.children)`;
+		case 'siblings': return `Array.from(%_%).map(e => parentNode.children)`;
 
 
 	
 		//// attributes ////
 		// .addClass()
-		case 'addClass': return `%_%.forEach(e => e.classList.add(${args}))`;
+		case 'addClass': return `Array.from(%_%).forEach(e => e.classList.add(${args}))`;
 
 		// .removeClass()
-		case 'removeClass': return `%_%.forEach(e => e.classList.remove(${args}))`;
+		case 'removeClass': return `Array.from(%_%).forEach(e => e.classList.remove(${args}))`;
 
 		// .toggleClass()
-		case 'toggleClass': return `%_%.forEach(e => e.classList.toggle(${args}))`;
+		case 'toggleClass': return `Array.from(%_%).forEach(e => e.classList.toggle(${args}))`;
 
 		// .hasClass()
 		case 'hasClass': return `%_%.some(e => e.classList.contains(${args}))`;
@@ -97,19 +101,70 @@ export default (name: string, args: string): string => {
 		// .attr()
 		case 'attr':
 			if (args.split(',').length === 1) return `%_%[0].getAttribute(${args})`;
-			if (args.split(',').length === 2) return `%_%.forEach(e => e.getAttribute(${args[0]}) = ${args[1]})`;
+			if (args.split(',').length === 2) return `Array.from(%_%).forEach(e => e.setAttribute(${args.split(',')[0]}) = ${args.split(',')[1]})`;
+			break;
+
+		// .prop()
+		case 'prop':
+			if (args.split(',').length === 1) return `%_%[0].${args.replace(/["'`]/g,'')}`;
+			if (args.split(',').length === 2) return `Array.from(%_%).forEach(e => e.${args.split(',')[0].replace(/["'`]/g,'')} = ${args.split(',')[1]})`;
 			break;
 
 		// .removeAttr()
-		case 'removeAttr': return `%_%.forEach(e => e.removeAttribute(${args}))`;
+		// .removeProp()
+		case 'removeAttr':
+		case 'removeProp':
+			return `Array.from(%_%).forEach(e => e.removeAttribute(${args}))`;
 
 		// .html()
-		case 'html': return args ? `%_%.forEach(e => e.innerHTML = ${args})` : `%_%[0].innerHTML`;
+		case 'html': return args ? `Array.from(%_%).forEach(e => e.innerHTML = ${args})` : `%_%[0].innerHTML`;
 
 		// .val()
-		case 'val': return args ? `%_%.forEach(e => e.value = ${args})` : `%_%[0].value`;
+		case 'val': return args ? `Array.from(%_%).forEach(e => e.value = ${args})` : `%_%[0].value`;
+
+		// .text()
+		case 'text': return args ? `Array.from(%_%).forEach(e => e.innerText = ${args})` : `Array.from(%_%).map(e => e.innerText).join('')`;
 
 
-		default: return '';
+
+		//// manipulation ////
+		// .append()
+		case 'append': return `Array.from(%_%).forEach(e => e.append(${args}))`;
+
+		// .appendTo()
+		case 'appendTo': return `Array.from(document.${makeQuerySelector(args)}).forEach(e => e.append(%_%))`;
+
+		// .after()
+		case 'after': return `Array.from(%_%).forEach(e => e.insertAdjacentHTML("afterend", ${args}.outerHTML))`;
+
+		// .insertAfter()
+		case 'insertAfter': return `Array.from(document.${makeQuerySelector(args)}).forEach(e => e.insertAdjacentHTML("afterend", %_%.outerHTML))`;
+
+		// .prepend()
+		case 'prepend': return `Array.from(%_%).forEach(e => e.prepend(${args}))`;
+
+		// .prependTo()
+		case 'prependTo': return `Array.from(document.${makeQuerySelector(args)}).forEach(e => e.prepend(%_%))`;
+
+		// .before()
+		case 'before': return `Array.from(%_%).forEach(e => e.insertAdjacentHTML("beforebegin", ${args}.outerHTML))`;
+
+		// .insertBefore()
+		case 'insertBefore': return `Array.from(document.${makeQuerySelector(args)}).forEach(e => e.insertAdjacentHTML("beforebegin", %_%.outerHTML))`;
+
+		// .remove()
+		case 'remove': return `Array.from(%_%).forEach(e => e.remove())`;
+
+		// .empty()
+		case 'empty': return `%_%.innerHTML = ""`;
+
+		// .replaceWith()
+		case 'replaceWith': return `Array.from(%_%).forEach(e => e.outerHTML = ${args})`;
+		// .replaceAll()
+		case 'replaceAll': return `Array.from(document.${makeQuerySelector(args)}).forEach(e => e.outerHTML = %_%)`;
+
+		// .width()
+		case 'width': return args ? `Array.from(%_%).forEach(e => e.style.width = ${Boolean(Number(args)) ? args + 'px' : args}` : `%_%[0].style.width`;
 	}
+	return '';
 };
