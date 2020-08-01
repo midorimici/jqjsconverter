@@ -14,35 +14,31 @@ const parBlock = (str: string): string => {
 	return str.slice(0, flag + 1);
 }
 
-const parBlockNum = (str: string): number => {
-  let flag: number = 0;
-  while (true) {
-    ++flag
-    str = str.replace(parBlock(str), '');
-    if (!str) break;
-  }
-  return flag;
-}
-
 export default (t: string) => {
 	let rtn: string = '';
 
 	// selector
-	rtn += `document.${makeQuerySelector(parBlock(t).replace(/(?:\$|jQuery)\((.*["'`] *)\)/g, '$1'))}`;
-
-	t = t.replace(parBlock(t), '');
-
-	// method
-	let regex: RegExp = /\.(\w+)\((.*)\)/g;
-	while (parBlock(t)) {
-		if (t.match(regex)) {
-			rtn = `${makeMethod(parBlock(t).replace(regex, '$1'),
-				parBlock(t).replace(regex, '$2'))}`.replace(/%_%/g, rtn);
-		}
+	let regex: RegExp = /(?:\$|jQuery)\((.*["'`] *)\)/g;
+	if (t.match(regex)) {
+		rtn += `document.${makeQuerySelector(parBlock(t).replace(regex, '$1'))}`;
 		t = t.replace(parBlock(t), '');
 	}
 
-	rtn = rtn.replace(/(getElementById\(["'`\w]+\)|\[0\])(?:\[0\]|.(?:map|forEach)\(e => e(.*)\))/g, '$1$2');
+	// method
+	regex = /\.(\w+)\((.*)\)/g;
+	if (t.match(regex)) {
+		while (parBlock(t)) {
+			if (t.match(regex)) {
+				rtn = `${makeMethod(parBlock(t).replace(regex, '$1'),
+					parBlock(t).replace(regex, '$2'))}`.replace(/%_%/g, rtn);
+			}
+			t = t.replace(parBlock(t), '');
+		}
+	}
+
+	rtn = rtn.replace(/(?:Array\.from\()?(.*getElementById\(["'`\w]+\)|.*\[0\])(?:\[0\]|\).(?:map|forEach)\(e => e(.*)\))/g, `$1$2`);
+
+	rtn = (rtn || t).replace(/event\.page([XY])/g, 'MouseEvent.page$1');
 
 	return rtn;
 };

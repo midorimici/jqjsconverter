@@ -160,11 +160,40 @@ export default (name: string, args: string): string => {
 
 		// .replaceWith()
 		case 'replaceWith': return `Array.from(%_%).forEach(e => e.outerHTML = ${args})`;
+
 		// .replaceAll()
 		case 'replaceAll': return `Array.from(document.${makeQuerySelector(args)}).forEach(e => e.outerHTML = %_%)`;
 
 		// .width()
-		case 'width': return args ? `Array.from(%_%).forEach(e => e.style.width = ${Boolean(Number(args)) ? args + 'px' : args}` : `%_%[0].style.width`;
+		case 'width': return args ? `Array.from(%_%).forEach(e => e.style.width = ${Boolean(Number(args)) ? `"${args}px"` : args})` : `%_%[0].style.width`;
+
+		// .innerWidth()
+		case 'innerWidth': return args ? `Array.from(%_%).forEach(e => e.style.width = ${Boolean(Number(args)) ? `"${args}px"` : args})` : `%_%[0].clientWidth`;
+
+		// .outerWidth()
+		case 'outerWidth': return args ? `Array.from(%_%).forEach(e => e.style.width = ${Boolean(Number(args)) ? `"${args}px"` : args})` : `%_%[0].offsetWidth`;
+
+		// .height()
+		case 'height': return args ? `Array.from(%_%).forEach(e => e.style.height = ${Boolean(Number(args)) ? `"${args}px"` : args})` : `%_%[0].style.height`;
+
+		// .innerHeight()
+		case 'innerHeight': return args ? `Array.from(%_%).forEach(e => e.style.height = ${Boolean(Number(args)) ? `"${args}px"` : args})` : `%_%[0].clientHeight`;
+
+		// .outerHeight()
+		case 'outerHeight': return args ? `Array.from(%_%).forEach(e => e.style.height = ${Boolean(Number(args)) ? `"${args}px"` : args})` : `%_%[0].offsetHeight`;
+
+		// .scrollLeft()
+		case 'scrollLeft': return args ? `Array.from(%_%).forEach(e => e.scrollLeft = ${args})` : `%_%[0].scrollLeft`;
+
+		// .scrollTop()
+		case 'scrollTop': return args ? `Array.from(%_%).forEach(e => e.scrollTop = ${args})` : `%_%[0].scrollTop`;
+
+		// .css()
+		case 'css': return args.split(',')[1]
+				? `Array.from(%_%).forEach(e => e.style.${
+					args.split(',')[0].replace(/["'`]/g, '').replace(/-(\w)/g, (v, p) => p.toUpperCase())
+				} = ${args.split(',')[1]})`
+				: `%_%[0].style.${args.split(',')[0].replace(/["'`]/g, '').replace(/-(\w)/g, (v, p) => p.toUpperCase())}`;
 	}
 	return '';
 };
