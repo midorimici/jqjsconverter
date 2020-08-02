@@ -194,6 +194,13 @@ export default (name: string, args: string): string => {
 					args.split(',')[0].replace(/["'`]/g, '').replace(/-(\w)/g, (v, p) => p.toUpperCase())
 				} = ${args.split(',')[1]})`
 				: `%_%[0].style.${args.split(',')[0].replace(/["'`]/g, '').replace(/-(\w)/g, (v, p) => p.toUpperCase())}`;
+
+
+
+		//// events ////
+		// on
+		case 'on': return `Array.from(%_%).forEach(e => e.addEventListener(${args.split(',')[0]}, ${args.split(',').slice(1).join(',')}))`;
+
 	}
 	return '';
 };

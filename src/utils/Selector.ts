@@ -143,9 +143,14 @@ export default (s: string): string => {
 	
 
 	//// create element ////
-	match = [...s.matchAll(/(?: )*(["'`])<(\w+) ?\/?>(?:<\/\w+>)?["'`](?: )*/g)][0];
+	// <div>
+	match = [...s.matchAll(/(?: )*(["'`])<(\w+)\s*\/?>(?:<\/\w+>)?["'`](?: )*/g)][0];
 	if (match) return `createElement(${match[1] + match[2] + match[1]})`;
 
+	// <div prop="">
+	match = [...s.matchAll(/(?: )*(["'`])<((?:[^>]|\n)+?)>(?:<\/\w+>)?["'`](?: )*/g)][0];
+	if (match) return `createElement(${match[1] + match[2].replace(/(\w+)\s/, '$1') + match[1]})\n`
+		+ ``;
 
 	//// selector ////
 	match = [...s.matchAll(/(?: )*(["'`])(.*)["'`](?: )*/g)][0];
