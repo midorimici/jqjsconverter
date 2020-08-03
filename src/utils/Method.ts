@@ -195,11 +195,45 @@ export default (name: string, args: string): string => {
 				} = ${args.split(',')[1]})`
 				: `%_%[0].style.${args.split(',')[0].replace(/["'`]/g, '').replace(/-(\w)/g, (v, p) => p.toUpperCase())}`;
 
+		// each
+		case 'each': return `Array.from(%_%).forEach(e => ${args})`;
+
 
 
 		//// events ////
 		// on
 		case 'on': return `Array.from(%_%).forEach(e => e.addEventListener(${args.split(',')[0]}, ${args.split(',').slice(1).join(',')}))`;
+
+		// off
+		case 'off': return `Array.from(%_%).forEach(e => e.removeEventListener(${args.split(',')[0]}, ${args.split(',').slice(1).join(',')}))`;
+
+		// hover
+		case 'hover': return `Array.from(%_%).forEach(e => e.addEventListener("mouseenter mouseleave", ${args}))`
+
+		// shorthands
+		case 'blur':
+		case 'change':
+		case 'click':
+		case 'contextmenu':
+		case 'dbclick':
+		case 'focus':
+		case 'focusin':
+		case 'focusout':
+		case 'keydown':
+		case 'keypress':
+		case 'keyup':
+		case 'mousedown':
+		case 'mouseenter':
+		case 'mouseleave':
+		case 'mousemove':
+		case 'mouseout':
+		case 'mouseover':
+		case 'mouseup':
+		case 'resize':
+		case 'scroll':
+		case 'select':
+		case 'submit':
+			return `Array.from(%_%).forEach(e => e.addEventListener(${name}, ${args}))`;
 
 	}
 	return '';

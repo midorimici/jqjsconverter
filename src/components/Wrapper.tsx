@@ -25,9 +25,11 @@ export default () => {
 		setJSValue(jq2js(jqGetter.current()));
 	};
 
+	/*
 	const convert2JS = (): void => {
 		setJQValue(jsGetter.current());
 	};
+	 */
 
 	return (
 		<>
@@ -42,11 +44,6 @@ export default () => {
 					onClick={convert2JQ}
 					disabled={!isEditorReady}
 				>▼</button>
-				<button
-					id='jsjq-button'
-					onClick={convert2JS}
-					disabled={!isEditorReady}
-				>▲</button>
 			</div>
 			<InputBox
 				handleEditorDidMount={jsHandleEditorDidMount}

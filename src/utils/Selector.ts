@@ -138,6 +138,7 @@ export default (s: string): string => {
 	
 
 	// :hidden
+
 	// :visible
 	
 	
@@ -148,9 +149,9 @@ export default (s: string): string => {
 	if (match) return `createElement(${match[1] + match[2] + match[1]})`;
 
 	// <div prop="">
-	match = [...s.matchAll(/(?: )*(["'`])<((?:[^>]|\n)+?)>(?:<\/\w+>)?["'`](?: )*/g)][0];
-	if (match) return `createElement(${match[1] + match[2].replace(/(\w+)\s/, '$1') + match[1]})\n`
-		+ ``;
+	// match = [...s.matchAll(/(?: )*(["'`])<((?:[^>]|\n)+?)>(?:<\/\w+>)?["'`](?: )*/g)][0];
+	/* if (match) return `createElement(${match[1] + match[2].replace(/(\w+)\s/, '$1') + match[1]})\n`
+		+ ``; */
 
 	//// selector ////
 	match = [...s.matchAll(/(?: )*(["'`])(.*)["'`](?: )*/g)][0];

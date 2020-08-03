@@ -10,6 +10,8 @@ export default () => {
 			</a>.</p>
 			<p>Some jQuery selectors and methods are not supported.</p>
 			<p>If it does not translate all, try deviding the code into single codes.</p>
+
+			<p>Reference: <a href="https://adventar.org/calendars/1075">脱jQuery Tips Advent Calendar 2015</a> (Japanese)</p>
 		</div>
 	);
 };
