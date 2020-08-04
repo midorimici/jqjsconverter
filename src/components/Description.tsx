@@ -12,6 +12,7 @@ export default () => {
 			<p>If it does not translate all, try deviding the code into single codes.</p>
 
 			<p>Reference: <a href="https://adventar.org/calendars/1075">脱jQuery Tips Advent Calendar 2015</a> (Japanese)</p>
+			<p><a href="https://github.com/midorimici/jqjsconverter">GitHub</a></p>
 		</div>
 	);
 };
