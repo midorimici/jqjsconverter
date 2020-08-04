@@ -233,7 +233,7 @@ export default (name: string, args: string): string => {
 		case 'scroll':
 		case 'select':
 		case 'submit':
-			return `Array.from(%_%).forEach(e => e.addEventListener(${name}, ${args}))`;
+			return `Array.from(%_%).forEach(e => e.addEventListener("${name}", ${args}))`;
 
 	}
 	return '';
