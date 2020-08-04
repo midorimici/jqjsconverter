@@ -5,7 +5,7 @@ import jq2js from '../utils/jqjsconv';
 
 export default () => {
 	const [isEditorReady, setIsEditorReady] = useState<boolean>(false);
-	const [jqValue, setJQValue] = useState<string>('');
+	const [jqValue] = useState<string>('');
 	const [jsValue, setJSValue] = useState<string>('');
 
 	const jqGetter = useRef<() => string>(() => '');
