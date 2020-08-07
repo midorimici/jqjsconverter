@@ -17,3 +17,7 @@
 	margin-top: 2rem;
 	text-align: center;
 }
+
+@media (max-width: 1200px) {
+	#App { width: 90%; }
+}
