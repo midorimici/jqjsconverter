@@ -63,12 +63,13 @@ export default (t: string) => {
 	if (rtn.match(regex)) rtn = rtn.replace(regex,
 		`${rtn.match(/forEach\(e =>|map\(e =>/g) ? 'e' : sel}.${
 			makeQuerySelector([...rtn.matchAll(regex)][0][1])}`);
-	console.log(rtn)
+	// console.log(rtn);
 
-	// inside function
+	/* inside function
 	regex = /(?:function\s*\(\s*[^)]*\s*\)|\(\s*[^)]*\s*\)\s*=>)\s*{?\s*(.*)\s*}?/g;
 	let match: string[] = [...rtn.matchAll(regex)][0];
 	if (match) rtn = rtn.replace(match[1], ematch ? parse(match[1])[0] : parse(match[1].slice(sel.length), sel)[0]);
+	*/
 
 	rtn = (rtn || t).replace(/event\.page([XY])/g, 'MouseEvent.page$1');
 

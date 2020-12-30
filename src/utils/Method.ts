@@ -16,10 +16,10 @@ export default (name: string, args: string): string => {
 		case 'slice': return `Array.from(%_%).slice(${args})`;
 
 		// .even()
-		case 'even': return `Array.from(%_%).filter((e, i) => i % 2 === 0)`;
+		case 'even': return 'Array.from(%_%).filter((e, i) => i % 2 === 0)';
 
 		// .odd()
-		case 'odd': return `Array.from(%_%).filter((e, i) => i % 2 === 1)`;
+		case 'odd': return 'Array.from(%_%).filter((e, i) => i % 2 === 1)';
 
 		// .filter()
 		case 'filter': {
